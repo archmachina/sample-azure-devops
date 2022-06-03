@@ -1,0 +1,27 @@
+trigger: none
+pr: none
+
+resources:
+  pipelines:
+    - pipeline: Pipeline1
+      project: Project1
+      source: "ArtifactName"
+      trigger:
+        enabled: true
+        branches:
+          include:
+            - main
+
+stages:
+  - stage: "Update"
+    jobs:
+      - job: "Update"
+        timeoutInMinutes: 60
+        workspace:
+          clean: all
+        steps:
+          - checkout: self
+            submodules: false
+            persistCredentials: true
+
+          - download: Pipeline1

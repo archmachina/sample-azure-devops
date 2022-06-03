@@ -1,0 +1,39 @@
+trigger:
+  branches:
+    include:
+      - dev
+      - 'feature/*'
+
+pr: none
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+stages:
+  - stage: "Validation"
+    jobs:
+      - job: "Validation"
+        timeoutInMinutes: 60
+        workspace:
+          clean: all
+        steps:
+          - checkout: self
+            submodules: false
+            persistCredentials: true
+
+          - task: Bash@3
+            displayName: "Terraform Format Check"
+            inputs:
+              targetType: inline
+              script: |
+                terraform fmt -check -diff -recursive ./terraform
+              failOnStderr: false
+              workingDirectory: $(Build.SourcesDirectory)
+
+          - task: Bash@3
+            displayName: "Yaml lint"
+            inputs:
+              targetType: inline
+              script: |
+                yamllint -c ./yamllint.yaml ./Ansible-Deployment/
+              workingDirectory: $(Build.SourcesDirectory)
